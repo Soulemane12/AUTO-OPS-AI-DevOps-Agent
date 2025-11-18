@@ -263,9 +263,15 @@ export default function Dashboard() {
       } else {
         const data = await response.json();
         if (data.mock && 'speechSynthesis' in window) {
+          // Stop any existing speech
+          speechSynthesis.cancel();
+
           const summaryText = data.summary_text || data.message;
-          const utterance = new SpeechSynthesisUtterance(summaryText);
-          utterance.rate = 0.9;
+          // Truncate to make it shorter (max 200 characters)
+          const shortText = summaryText.length > 200 ? summaryText.substring(0, 200) + "..." : summaryText;
+
+          const utterance = new SpeechSynthesisUtterance(shortText);
+          utterance.rate = 1.2; // Faster speech
           utterance.pitch = 1.0;
           utterance.volume = 0.8;
 
@@ -328,8 +334,14 @@ export default function Dashboard() {
 
           // Use browser speech synthesis
           if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(summaryText);
-            utterance.rate = 0.9;
+            // Stop any existing speech to prevent looping
+            speechSynthesis.cancel();
+
+            // Truncate to make it shorter (max 200 characters)
+            const shortText = summaryText.length > 200 ? summaryText.substring(0, 200) + "..." : summaryText;
+
+            const utterance = new SpeechSynthesisUtterance(shortText);
+            utterance.rate = 1.2; // Faster speech
             utterance.pitch = 1.0;
             utterance.volume = 0.8;
 
@@ -350,7 +362,8 @@ export default function Dashboard() {
             speechSynthesis.speak(utterance);
           } else {
             // Fallback to alert if speech synthesis not supported
-            const modalContent = `🎤 VOICE SUMMARY\n\n${summaryText}\n\n(Speech synthesis not supported in this browser)`;
+            const shortText = summaryText.length > 200 ? summaryText.substring(0, 200) + "..." : summaryText;
+            const modalContent = `🎤 VOICE SUMMARY\n\n${shortText}\n\n(Speech synthesis not supported in this browser)`;
             alert(modalContent);
           }
         }
