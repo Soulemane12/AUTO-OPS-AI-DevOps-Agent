@@ -198,15 +198,15 @@ export default function Dashboard() {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to trigger demo error');
+        throw new Error(data.error || 'Failed to Find Error');
       }
 
       console.log('Demo error triggered:', data.incidentId);
       alert('Demo incident created. Watch the timeline to approve it.');
       fetchIncidents();
     } catch (error: any) {
-      console.error('Failed to trigger demo error:', error);
-      alert(error?.message || 'Failed to trigger demo error.');
+      console.error('Failed to Find Error:', error);
+      alert(error?.message || 'Failed to Find Error.');
     } finally {
       setIsTriggering(false);
     }
@@ -280,7 +280,7 @@ export default function Dashboard() {
                     disabled={isTriggering}
                     className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-60"
                   >
-                    {isTriggering ? 'Triggering…' : 'Trigger Demo Error'}
+                    {isTriggering ? 'Triggering…' : 'Find Error'}
                   </button>
                   <button
                     onClick={handleClearIncidents}
