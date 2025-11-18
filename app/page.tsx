@@ -69,6 +69,7 @@ export default function Dashboard() {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [isTriggering, setIsTriggering] = useState(false);
+  const [previousIncidentStatuses, setPreviousIncidentStatuses] = useState<Record<string, string>>({});
 
   // Fetch incidents from API
   const fetchIncidents = async () => {
@@ -76,11 +77,32 @@ export default function Dashboard() {
       const response = await fetch('/api/incidents');
       if (response.ok) {
         const data = await response.json();
-        setIncidents(data.incidents || []);
+        const newIncidents = data.incidents || [];
+
+        // Check for status changes and auto-play voice for newly completed incidents
+        newIncidents.forEach((incident: RealIncident) => {
+          const previousStatus = previousIncidentStatuses[incident.id];
+          if (previousStatus && previousStatus !== 'completed' && incident.status === 'completed') {
+            console.log(`🎤 Incident ${incident.id} completed - auto-playing voice summary`);
+            // Small delay to ensure audio_url is available
+            setTimeout(() => {
+              autoPlayVoiceSummary(incident.id);
+            }, 2000);
+          }
+        });
+
+        // Update previous statuses
+        const statusMap: Record<string, string> = {};
+        newIncidents.forEach((incident: RealIncident) => {
+          statusMap[incident.id] = incident.status;
+        });
+        setPreviousIncidentStatuses(statusMap);
+
+        setIncidents(newIncidents);
 
         // If no incident selected and we have incidents, select the first one
-        if (!selectedIncident && data.incidents.length > 0) {
-          selectIncident(data.incidents[0]);
+        if (!selectedIncident && newIncidents.length > 0) {
+          selectIncident(newIncidents[0]);
         }
       }
     } catch (error) {
@@ -148,8 +170,11 @@ export default function Dashboard() {
       await fetchIncidents();
       if (data.incident) {
         await selectIncident(data.incident);
+        // Automatically play voice summary after completion
+        setTimeout(() => {
+          autoPlayVoiceSummary(data.incident.id);
+        }, 1000); // Small delay to ensure status is updated
       }
-      alert('Incident marked as completed. GitHub PR and voice summary have been triggered.');
     } catch (error: any) {
       console.error('Failed to complete incident:', error);
       alert(error?.message || 'Failed to manually complete incident.');
@@ -209,6 +234,57 @@ export default function Dashboard() {
       alert(error?.message || 'Failed to Find Error.');
     } finally {
       setIsTriggering(false);
+    }
+  };
+
+  // Automatic voice playback (less intrusive)
+  const autoPlayVoiceSummary = async (incidentId: string) => {
+    try {
+      console.log(`🎤 Auto-playing voice summary for incident ${incidentId}`);
+
+      const response = await fetch(`/api/incidents/${incidentId}/audio`);
+      if (!response.ok) {
+        console.log(`Voice summary not yet available for incident ${incidentId}`);
+        return; // Silently fail for auto-play
+      }
+
+      const contentType = response.headers.get("content-type");
+
+      if (contentType?.includes("audio/")) {
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play().catch(() => {
+          console.log("Auto-play blocked by browser - user interaction required");
+        });
+        audio.addEventListener('ended', () => {
+          URL.revokeObjectURL(audioUrl);
+        });
+      } else {
+        const data = await response.json();
+        if (data.mock && 'speechSynthesis' in window) {
+          const summaryText = data.summary_text || data.message;
+          const utterance = new SpeechSynthesisUtterance(summaryText);
+          utterance.rate = 0.9;
+          utterance.pitch = 1.0;
+          utterance.volume = 0.8;
+
+          const voices = speechSynthesis.getVoices();
+          const femaleVoice = voices.find(voice =>
+            voice.name.toLowerCase().includes('female') ||
+            voice.name.toLowerCase().includes('woman') ||
+            voice.name.toLowerCase().includes('samantha') ||
+            voice.name.toLowerCase().includes('victoria')
+          );
+          if (femaleVoice) {
+            utterance.voice = femaleVoice;
+          }
+
+          speechSynthesis.speak(utterance);
+        }
+      }
+    } catch (error) {
+      console.log("Auto-play voice summary failed:", error);
     }
   };
 
