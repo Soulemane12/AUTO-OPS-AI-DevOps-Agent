@@ -3,8 +3,8 @@ import type { Incident } from "./agent";
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = process.env.GITHUB_REPO?.split("/")[0] || "Soulemane12";
-const REPO_NAME = process.env.GITHUB_REPO?.split("/")[1] || "auto-ops-  -python";
-const REPO_BRANCH = process.env.GITHUB_REPO_BRANCH || "master";
+const REPO_NAME = process.env.GITHUB_REPO?.split("/")[1] || "AUTO-OPS-AI-DevOps-Agent";
+const REPO_BRANCH = process.env.GITHUB_REPO_BRANCH || "main";
 
 export async function createPullRequestForIncident(incident: Incident): Promise<string> {
   if (!GITHUB_TOKEN) {
