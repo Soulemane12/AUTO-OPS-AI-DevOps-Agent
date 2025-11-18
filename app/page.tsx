@@ -362,18 +362,18 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className="h-screen bg-gray-50 flex flex-col">
+      <header className="bg-white shadow-sm border-b flex-shrink-0">
         <div className="px-6 py-4">
           <h1 className="text-2xl font-bold text-gray-900">Auto-Ops Dashboard</h1>
           <p className="text-sm text-gray-600">Incident monitoring and automation</p>
         </div>
       </header>
 
-        <div className="flex h-[calc(100vh-80px)]">
+        <div className="flex flex-1 min-h-0">
           {/* Left Panel - Incident List */}
-          <div className="w-1/2 bg-white border-r">
-            <div className="p-4 border-b bg-gray-50">
+          <div className="w-1/2 bg-white border-r flex flex-col">
+            <div className="p-4 border-b bg-gray-50 flex-shrink-0">
               <div className="flex items-center justify-between gap-4">
                 <h2 className="text-lg font-semibold text-gray-900">Incidents</h2>
                 <div className="flex items-center gap-2">
@@ -401,7 +401,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-          <div className="overflow-y-auto h-full">
+          <div className="overflow-y-auto flex-1">
             {isLoading ? (
               <div className="p-8 text-center text-gray-500">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -450,8 +450,8 @@ export default function Dashboard() {
         </div>
 
         {/* Right Panel - Agent Console */}
-        <div className="w-1/2 bg-white">
-          <div className="p-4 border-b bg-gray-50">
+        <div className="w-1/2 bg-white flex flex-col">
+          <div className="p-4 border-b bg-gray-50 flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900">Agent Console</h2>
             {selectedIncident && (
               <p className="text-sm text-gray-600">
@@ -460,7 +460,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="p-6 overflow-y-auto h-full">
+          <div className="p-6 overflow-y-auto flex-1">
             {selectedIncident ? (
               <div className="space-y-4">
                 <div className="mb-6">
