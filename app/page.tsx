@@ -204,14 +204,14 @@ export default function Dashboard() {
     }
   };
 
-  const handleTriggerDemoError = async () => {
+  const handleTriggerError = async () => {
     setIsTriggering(true);
     try {
       const payload = {
-        filename: "auto-ops-demo-python/app.py",
+        filename: "auto-ops-python/app.py",
         error_type: "KeyError",
         message: "'customer'",
-        traceback: "Traceback (most recent call last):\n  File \"auto-ops-demo-python/app.py\", line 6, in <module>\n    print(checkout(data))\n  File \"auto-ops-demo-python/app.py\", line 2, in checkout\n    return order['customer']['id']\nKeyError: 'customer'",
+        traceback: "Traceback (most recent call last):\n  File \"auto-ops-python/app.py\", line 6, in <module>\n    print(checkout(data))\n  File \"auto-ops-python/app.py\", line 2, in checkout\n    return order['customer']['id']\nKeyError: 'customer'",
         code: `def checkout(order):\n    return order["customer"]["id"]  # will error if keys missing\n\nif __name__ == "__main__":\n    data = {}  # guaranteed KeyError\n    print(checkout(data))`
       };
 
@@ -223,15 +223,15 @@ export default function Dashboard() {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to Find Error');
+        throw new Error(data.error || 'Failed to trigger error');
       }
 
-      console.log('Demo error triggered:', data.incidentId);
-      alert('Demo incident created. Watch the timeline to approve it.');
+      console.log('Error triggered:', data.incidentId);
+      alert('Incident created. Watch the timeline to approve it.');
       fetchIncidents();
     } catch (error: any) {
-      console.error('Failed to Find Error:', error);
-      alert(error?.message || 'Failed to Find Error.');
+      console.error('Failed to trigger error:', error);
+      alert(error?.message || 'Failed to trigger error.');
     } finally {
       setIsTriggering(false);
     }
@@ -378,7 +378,7 @@ export default function Dashboard() {
                 <h2 className="text-lg font-semibold text-gray-900">Incidents</h2>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={handleTriggerDemoError}
+                    onClick={handleTriggerError}
                     disabled={isTriggering}
                     className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-60"
                   >
@@ -558,18 +558,12 @@ export default function Dashboard() {
 
                 {/* Voice Summary Section */}
                 {selectedIncident.status === "completed" && selectedIncident.audio_url && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="text-base font-medium text-gray-900 mb-3">
-                      🎤 Voice Summary
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3">
-                      Listen to an AI-generated summary of this incident resolution.
-                    </p>
+                  <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <button
                       onClick={() => playVoiceSummary(selectedIncident.id)}
-                      className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
                     >
-                      🔊 Play Voice Summary
+                      🔊 Play Summary
                     </button>
                   </div>
                 )}

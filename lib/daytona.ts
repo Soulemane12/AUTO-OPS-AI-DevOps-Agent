@@ -1,7 +1,7 @@
 import { Daytona } from "@daytonaio/sdk";
 import type { Incident } from "./agent";
 
-const REPO_URL = process.env.GITHUB_REPO_URL || "https://github.com/Soulemane12/auto-ops-demo-python";
+const REPO_URL = process.env.GITHUB_REPO_URL || "https://github.com/Soulemane12/auto-ops-  -python";
 const REPO_BRANCH = process.env.GITHUB_REPO_BRANCH || "master";
 
 // Initialize Daytona SDK
@@ -119,7 +119,7 @@ export async function testPatchInDaytona(incident: Incident): Promise<{success: 
 
 // Helper function to apply patch content
 function applyPatchToContent(incident: Incident): string {
-  // For demo purposes, apply a simple fix for KeyError
+  // For    purposes, apply a simple fix for KeyError
   if (incident.error_type === "KeyError" && incident.message.includes("customer")) {
     return `def checkout(order):
     # AUTO-OPS Fix: Add validation to prevent KeyError
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 function simulatePatchTesting(incident: Incident): {success: boolean, output: string} {
   console.log(`🎭 Simulating patch test for incident ${incident.id}`);
 
-  // For the demo, simulate successful patch testing
+  // For the   , simulate successful patch testing
   // In reality, this would be based on the actual patch content
   const hasValidPatch = incident.patch && incident.patch.length > 50;
   const isKeyError = incident.error_type === "KeyError";
@@ -182,7 +182,7 @@ function getRepoRelativePath(filename: string): string {
   }
 
   const normalized = filename.replace(/\\/g, "/").replace(/^\/+/, "");
-  const repoName = REPO_URL.split("/").pop()?.replace(/\.git$/, "") || "auto-ops-demo-python";
+  const repoName = REPO_URL.split("/").pop()?.replace(/\.git$/, "") || "auto-ops-  -python";
   const repoPrefix = `${repoName}/`;
   const repoIndex = normalized.indexOf(repoPrefix);
 

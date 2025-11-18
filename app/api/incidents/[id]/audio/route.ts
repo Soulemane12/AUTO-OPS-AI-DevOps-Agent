@@ -29,7 +29,7 @@ export async function GET(
     if (incident.audio_url.startsWith('data:audio/')) {
       // Check if this is a mock audio URL
       if (incident.audio_url.includes('mock-audio')) {
-        const mockAudioMessage = `🎭 Demo Voice Summary: AUTO-OPS successfully fixed a Python KeyError in ${incident.filename}. The automated fix passed tests in a Daytona isolated environment and a GitHub pull request has been opened for review.`;
+        const mockAudioMessage = `🎭    Voice Summary: AUTO-OPS successfully fixed a Python KeyError in ${incident.filename}. The automated fix passed tests in a Daytona isolated environment and a GitHub pull request has been opened for review.`;
         return NextResponse.json({
           message: mockAudioMessage,
           incident_id: incidentId,

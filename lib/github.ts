@@ -3,7 +3,7 @@ import type { Incident } from "./agent";
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = process.env.GITHUB_REPO?.split("/")[0] || "Soulemane12";
-const REPO_NAME = process.env.GITHUB_REPO?.split("/")[1] || "auto-ops-demo-python";
+const REPO_NAME = process.env.GITHUB_REPO?.split("/")[1] || "auto-ops-  -python";
 const REPO_BRANCH = process.env.GITHUB_REPO_BRANCH || "master";
 
 export async function createPullRequestForIncident(incident: Incident): Promise<string> {
@@ -96,13 +96,13 @@ Fixed by AUTO-OPS agent for incident ${incident.id}
 
   } catch (error) {
     console.error(`Error creating GitHub PR:`, error);
-    // Return simulated PR for demo
+    // Return simulated PR for   
     return simulatePRCreation(incident);
   }
 }
 
 function applyPatchToCode(originalContent: string, incident: Incident): string {
-  // For demo purposes, apply a simple fix for KeyError
+  // For    purposes, apply a simple fix for KeyError
   if (incident.error_type === "KeyError" && incident.message.includes("customer")) {
     return originalContent.replace(
       'def checkout(order):',

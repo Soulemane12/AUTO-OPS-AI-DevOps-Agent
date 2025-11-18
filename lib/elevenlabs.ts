@@ -50,7 +50,7 @@ export async function generateVoiceSummary(incident: Incident): Promise<string> 
 
   } catch (error) {
     console.error(`Error generating voice summary:`, error);
-    // Return simulated audio for demo
+    // Return simulated audio for   
     return simulateVoiceGeneration(incident);
   }
 }
@@ -67,7 +67,7 @@ function constructSummaryText(incident: Incident): string {
 function simulateVoiceGeneration(incident: Incident): string {
   console.log(`🎭 Simulating voice generation for incident ${incident.id}`);
 
-  // Return a mock data URL for demo purposes
+  // Return a mock data URL for    purposes
   const simulatedAudioUrl = `data:audio/mpeg;base64,mock-audio-${incident.id.slice(0, 8)}`;
 
   console.log(`Summary text: "${constructSummaryText(incident)}"`);
