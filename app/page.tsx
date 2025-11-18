@@ -245,12 +245,38 @@ export default function Dashboard() {
           URL.revokeObjectURL(audioUrl);
         });
       } else {
-        // Mock response
+        // Mock response - use browser TTS instead of alert
         const data = await response.json();
         if (data.mock) {
           const summaryText = data.summary_text || data.message;
-          const modalContent = `🎤 VOICE SUMMARY (Demo Mode)\n\n${summaryText}\n\n🎭 In production, this would be played as actual speech using ElevenLabs TTS with Rachel's voice.\n\nThe AUTO-OPS system successfully completed the full workflow:\n✅ Error detected and analyzed by Claude\n✅ Patch generated and tested in Daytona\n✅ Pull request created for CodeRabbit review\n✅ Voice summary generated`;
-          alert(modalContent);
+
+          // Use browser speech synthesis
+          if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(summaryText);
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 0.8;
+
+            // Try to find a female voice
+            const voices = speechSynthesis.getVoices();
+            const femaleVoice = voices.find(voice =>
+              voice.name.toLowerCase().includes('female') ||
+              voice.name.toLowerCase().includes('woman') ||
+              voice.name.toLowerCase().includes('samantha') ||
+              voice.name.toLowerCase().includes('victoria')
+            );
+
+            if (femaleVoice) {
+              utterance.voice = femaleVoice;
+            }
+
+            console.log(`🎤 Playing voice summary using browser TTS`);
+            speechSynthesis.speak(utterance);
+          } else {
+            // Fallback to alert if speech synthesis not supported
+            const modalContent = `🎤 VOICE SUMMARY\n\n${summaryText}\n\n(Speech synthesis not supported in this browser)`;
+            alert(modalContent);
+          }
         }
       }
     } catch (error) {

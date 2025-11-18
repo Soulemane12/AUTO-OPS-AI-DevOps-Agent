@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Incident } from "./agent";
 
 const ELEVENLABS_API_URL = "https://api.elevenlabs.io/v1";
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+const ELEVENLABS_API_KEY = process.env.ELEVEN_LABS_API_KEY;
 const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // Rachel voice
 
 export async function generateVoiceSummary(incident: Incident): Promise<string> {
