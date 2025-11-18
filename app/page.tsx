@@ -370,7 +370,7 @@ export default function Dashboard() {
                       {selectedIncident.message}
                     </p>
                     <p className="text-red-600 text-sm mt-1">
-                      File: {selectedIncident.file}, Line: {selectedIncident.line}
+                      File: {selectedIncident.filename}, Line: {selectedIncident.line}
                     </p>
                   </div>
                 </div>
