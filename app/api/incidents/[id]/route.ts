@@ -63,7 +63,7 @@ function generateIncidentTimeline(incident: any) {
 
   for (let i = 0; i < statusSteps.length; i++) {
     const stepInfo = statusSteps[i];
-    let stepStatus: "completed" | "running" | "pending";
+    let stepStatus: "completed" | "running" | "pending" | "failed";
 
     if (i < currentStatusIndex) {
       stepStatus = "completed";
