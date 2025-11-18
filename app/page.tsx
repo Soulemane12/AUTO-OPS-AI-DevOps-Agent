@@ -70,6 +70,8 @@ export default function Dashboard() {
   const [isClearing, setIsClearing] = useState(false);
   const [isTriggering, setIsTriggering] = useState(false);
   const [previousIncidentStatuses, setPreviousIncidentStatuses] = useState<Record<string, string>>({});
+  const [playedVoiceSummaries, setPlayedVoiceSummaries] = useState<Set<string>>(new Set());
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   // Fetch incidents from API
   const fetchIncidents = async () => {
@@ -82,8 +84,9 @@ export default function Dashboard() {
         // Check for status changes and auto-play voice for newly completed incidents
         newIncidents.forEach((incident: RealIncident) => {
           const previousStatus = previousIncidentStatuses[incident.id];
-          if (previousStatus && previousStatus !== 'completed' && incident.status === 'completed') {
+          if (previousStatus && previousStatus !== 'completed' && incident.status === 'completed' && !playedVoiceSummaries.has(incident.id)) {
             console.log(`🎤 Incident ${incident.id} completed - auto-playing voice summary`);
+            setPlayedVoiceSummaries(prev => new Set([...prev, incident.id]));
             // Small delay to ensure audio_url is available
             setTimeout(() => {
               autoPlayVoiceSummary(incident.id);
@@ -170,10 +173,13 @@ export default function Dashboard() {
       await fetchIncidents();
       if (data.incident) {
         await selectIncident(data.incident);
-        // Automatically play voice summary after completion
-        setTimeout(() => {
-          autoPlayVoiceSummary(data.incident.id);
-        }, 1000); // Small delay to ensure status is updated
+        // Automatically play voice summary after completion (only if not played before)
+        if (!playedVoiceSummaries.has(data.incident.id)) {
+          setPlayedVoiceSummaries(prev => new Set([...prev, data.incident.id]));
+          setTimeout(() => {
+            autoPlayVoiceSummary(data.incident.id);
+          }, 1000); // Small delay to ensure status is updated
+        }
       }
     } catch (error: any) {
       console.error('Failed to complete incident:', error);
@@ -240,6 +246,12 @@ export default function Dashboard() {
   // Automatic voice playback (less intrusive)
   const autoPlayVoiceSummary = async (incidentId: string) => {
     try {
+      // Prevent multiple simultaneous speech
+      if (isSpeaking) {
+        console.log("Speech already in progress, skipping auto-play");
+        return;
+      }
+
       console.log(`🎤 Auto-playing voice summary for incident ${incidentId}`);
 
       const response = await fetch(`/api/incidents/${incidentId}/audio`);
@@ -254,17 +266,21 @@ export default function Dashboard() {
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
+        setIsSpeaking(true);
         audio.play().catch(() => {
           console.log("Auto-play blocked by browser - user interaction required");
+          setIsSpeaking(false);
         });
         audio.addEventListener('ended', () => {
           URL.revokeObjectURL(audioUrl);
+          setIsSpeaking(false);
         });
       } else {
         const data = await response.json();
         if (data.mock && 'speechSynthesis' in window) {
-          // Stop any existing speech
+          // Stop any existing speech and set speaking flag
           speechSynthesis.cancel();
+          setIsSpeaking(true);
 
           const summaryText = data.summary_text || data.message;
           // Truncate to make it shorter (max 200 characters)
@@ -274,6 +290,14 @@ export default function Dashboard() {
           utterance.rate = 1.2; // Faster speech
           utterance.pitch = 1.0;
           utterance.volume = 0.8;
+
+          // Clear speaking flag when done
+          utterance.addEventListener('end', () => {
+            setIsSpeaking(false);
+          });
+          utterance.addEventListener('error', () => {
+            setIsSpeaking(false);
+          });
 
           const voices = speechSynthesis.getVoices();
           const femaleVoice = voices.find(voice =>
@@ -291,11 +315,18 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.log("Auto-play voice summary failed:", error);
+      setIsSpeaking(false);
     }
   };
 
   const playVoiceSummary = async (incidentId: string) => {
     try {
+      // Prevent multiple simultaneous speech
+      if (isSpeaking) {
+        alert("Voice summary is already playing. Please wait for it to finish.");
+        return;
+      }
+
       console.log(`Playing voice summary for incident ${incidentId}`);
 
       // Fetch the audio from our API endpoint
@@ -316,15 +347,18 @@ export default function Dashboard() {
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
+        setIsSpeaking(true);
 
         audio.play().catch((error) => {
           console.error("Error playing audio:", error);
           alert("Failed to play voice summary. Check browser audio permissions.");
+          setIsSpeaking(false);
         });
 
         // Clean up object URL after audio ends
         audio.addEventListener('ended', () => {
           URL.revokeObjectURL(audioUrl);
+          setIsSpeaking(false);
         });
       } else {
         // Mock response - use browser TTS instead of alert
@@ -336,6 +370,7 @@ export default function Dashboard() {
           if ('speechSynthesis' in window) {
             // Stop any existing speech to prevent looping
             speechSynthesis.cancel();
+            setIsSpeaking(true);
 
             // Truncate to make it shorter (max 200 characters)
             const shortText = summaryText.length > 200 ? summaryText.substring(0, 200) + "..." : summaryText;
@@ -344,6 +379,14 @@ export default function Dashboard() {
             utterance.rate = 1.2; // Faster speech
             utterance.pitch = 1.0;
             utterance.volume = 0.8;
+
+            // Clear speaking flag when done
+            utterance.addEventListener('end', () => {
+              setIsSpeaking(false);
+            });
+            utterance.addEventListener('error', () => {
+              setIsSpeaking(false);
+            });
 
             // Try to find a female voice
             const voices = speechSynthesis.getVoices();
@@ -371,6 +414,7 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error playing voice summary:", error);
       alert("Failed to load voice summary. Please try again.");
+      setIsSpeaking(false);
     }
   };
 
